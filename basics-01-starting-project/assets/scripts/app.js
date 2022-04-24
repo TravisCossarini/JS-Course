@@ -14,7 +14,12 @@ function createAndWriteOutput(operator, resultBeforeCalc, calcNum) {
     outputResult(result, calcDescription);
 }
 
-function appendToLog(resultAfterCalc, operator, resultBeforeCalc, enteredNumber) {
+function appendToLog(
+    resultAfterCalc,
+    operator,
+    resultBeforeCalc,
+    enteredNumber
+) {
     const logEntry = {
         operation: operator,
         prevResult: resultBeforeCalc,
@@ -24,32 +29,40 @@ function appendToLog(resultAfterCalc, operator, resultBeforeCalc, enteredNumber)
     logEntries.push(logEntry);
 }
 
-function divide() {
+function caclulateResult(calcType) {
     const enteredNumber = getUserInput();
+    if(!enteredNumber){
+        return;
+    }
     const initialResult = result;
-    result = result / enteredNumber;
-    createAndWriteOutput('/', initialResult, enteredNumber);
+    if (calcType === '/') {
+        result = result / enteredNumber;
+    } else if (calcType === '*') {
+        result = result * enteredNumber;
+    } else if (calcType === '+') {
+        result = result + enteredNumber;
+    } else if (calcType === '-') {
+        result = result - enteredNumber;
+    } else {
+        return;
+    }
+    createAndWriteOutput(calcType, initialResult, enteredNumber);
+}
+
+function divide() {
+    caclulateResult('/');
 }
 
 function multiply() {
-    const enteredNumber = getUserInput();
-    const initialResult = result;
-    result = result * enteredNumber;
-    createAndWriteOutput('*', initialResult, enteredNumber);
+    caclulateResult('*');
 }
 
 function add() {
-    const enteredNumber = getUserInput();
-    const initialResult = result;
-    result = result + enteredNumber;
-    createAndWriteOutput('+', initialResult, enteredNumber);
+    caclulateResult('+');
 }
 
 function subtract() {
-    const enteredNumber = getUserInput();
-    const initialResult = result;
-    result = result - enteredNumber;
-    createAndWriteOutput('-', initialResult, enteredNumber);
+    caclulateResult('-');
 }
 
 addBtn.addEventListener('click', add);
