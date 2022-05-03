@@ -132,7 +132,13 @@ function writeToLog(event, value, currentMonsterHealth, currentPlayerHealth) {
 }
 
 function showLogHandler() {
-    console.log(battleLog);
+    let i = 0;
+    for (const element of battleLog) {
+        console.log(`#${i}`);
+        for (const key in element) {
+            console.log(`${key} -> ${element[key]}`);
+        }
+    }
 }
 
 attackBtn.addEventListener('click', attackHandler);
