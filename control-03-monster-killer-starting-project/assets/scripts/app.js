@@ -8,15 +8,26 @@ const LOG_PLAYER_HEAL = 'PLAYER_HEAL';
 const LOG_MONSTER_ATTACK = 'MONSTER_ATTACK';
 const LOG_GAME_OVER = 'GAME_OVER';
 
-let chosenMaxLife = parseInt(prompt('Max Life for you and monster', '100'));
-if (isNaN(chosenMaxLife) || chosenMaxLife <= 0) {
-    alert('Invalid input, setting life to 100');
-    chosenMaxLife = 100;
-}
 let currentMonsterHealth = chosenMaxLife;
 let currentPlayerHealth = chosenMaxLife;
 let hasBonusLife = true;
 let battleLog = [];
+let chosenMaxLife;
+
+try {
+    chosenMaxLife = getMaxLifeValues();
+} catch (error) {
+    chosenMaxLife = 100;
+    alert('Invalid input, setting max life to 100');
+}
+
+function getMaxLifeValues() {
+    let parsedValue = parseInt(prompt('Max Life for you and monster', '100'));
+    if (isNaN(parsedValue) || parsedValue <= 0) {
+        throw { message: 'Invalid user input' };
+    }
+    return parseInt;
+}
 
 adjustHealthBars(chosenMaxLife);
 
