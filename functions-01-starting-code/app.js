@@ -9,7 +9,7 @@ const RESULT_LOSS = 'LOSS';
 
 let gameIsRunning = false;
 
-function startGame() {
+const startGame = () => {
     if (gameIsRunning === true) {
         return;
     }
