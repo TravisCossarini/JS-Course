@@ -5,6 +5,7 @@ class DOMHelper {
             newDestinationSelector
         );
         destinationElement.append(element);
+        element.scrollIntoView({ behavior: 'smooth' });
     }
 
     static clearEventListeners(element) {
@@ -16,7 +17,7 @@ class DOMHelper {
 
 class Component {
     constructor(hostElementId, insertBefore = false) {
-        if(hostElementId) {
+        if (hostElementId) {
             this.hostElement = document.getElementById(hostElementId);
         } else {
             this.hostElement = document.body;
@@ -24,27 +25,49 @@ class Component {
         this.insertBefore = insertBefore;
     }
     attach() {
-        this.hostElement.insertAdjacentElement(this.insertBefore ? 'afterbegin' : 'beforeend', this.element);
+        this.hostElement.insertAdjacentElement(
+            this.insertBefore ? 'afterbegin' : 'beforeend',
+            this.element
+        );
     }
 
     detach() {
-        if(this.element) {
-           this.element.remove(); 
+        if (this.element) {
+            this.element.remove();
         }
     }
 }
 
 class Tooltip extends Component {
-    constructor(closeNotifierFunction) {
-        super();
+    constructor(closeNotifierFunction, text, hostElementId) {
+        super(hostElementId);
         this.closeNotifier = closeNotifierFunction;
+        this.text = text;
         this.create();
     }
 
     create() {
         const tooltipElement = document.createElement('div');
         tooltipElement.className = 'card';
-        tooltipElement.textContent = 'Test';
+
+        const toolTipTemplate = document.getElementById('tooltip');
+        const toolTipBody = document.importNode(toolTipTemplate.content, true);
+
+        toolTipBody.querySelector('p').textContent = this.text;
+        tooltipElement.append(toolTipBody);
+
+        const hostElPosLeft = this.hostElement.offsetLeft;
+        const hostElPosTop = this.hostElement.offsetTop;
+        const hostElPosHeight = this.hostElement.clientHeight;
+        const parentElScroll = this.hostElement.parentElement.scrollTop;
+
+        const x = hostElPosLeft + 20;
+        const y = hostElPosTop + hostElPosHeight - 10 - parentElScroll;
+
+        tooltipElement.style.position = 'absolute';
+        tooltipElement.style.left = x + 'px';
+        tooltipElement.style.top = y + 'px';
+
         tooltipElement.addEventListener('click', this.closeToolTip.bind(this));
         this.element = tooltipElement;
     }
@@ -67,7 +90,10 @@ class Project {
 
     connectMoreInfoButton() {
         this.moreInfoBtn = document.querySelectorAll(`#${this.id} button`)[0];
-        this.moreInfoBtn.addEventListener('click', this.moreInfoBtnHandler);
+        this.moreInfoBtn.addEventListener(
+            'click',
+            this.moreInfoBtnHandler.bind(this)
+        );
     }
 
     connectSwitchButton(type) {
@@ -85,9 +111,14 @@ class Project {
         if (this.hasActiveTooltip) {
             return;
         }
-        const tooltip = new Tooltip(() => {
-            this.hasActiveTooltip = false;
-        });
+        const projectElement = document.getElementById(this.id);
+        const tooltip = new Tooltip(
+            () => {
+                this.hasActiveTooltip = false;
+            },
+            projectElement.dataset.extraInfo,
+            this.id
+        );
         tooltip.attach();
         this.hasActiveTooltip = true;
     }
@@ -124,7 +155,7 @@ class ProjectList {
 
     addProject(project) {
         this.projects.push(project);
-        DOMHelper.moveElement(project.id, `#${this.listSection.id}`);
+        DOMHelper.moveElement(project.id, `#${this.listSection.id} ul`);
         project.update(this.switchProject.bind(this), this.listType);
     }
 
@@ -146,6 +177,15 @@ class App {
         );
         activeList.setSwitchHandler(finishedList.addProject.bind(finishedList));
         finishedList.setSwitchHandler(activeList.addProject.bind(activeList));
+
+        setTimeout(this.startAnalytics, 5000)
+    }
+
+    static startAnalytics() {
+        const anlyticsScript = document.createElement('script');
+        anlyticsScript.src = 'assets/scripts/analytics.js';
+        anlyticsScript.defer = true;
+        document.head.append(anlyticsScript);
     }
 }
 
