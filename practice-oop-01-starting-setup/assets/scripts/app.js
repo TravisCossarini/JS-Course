@@ -86,6 +86,7 @@ class Project {
         this.updateProjectListHandler = updateProjectListFunction;
         this.connectSwitchButton(type);
         this.connectMoreInfoButton();
+        this.connectDrag();
     }
 
     connectMoreInfoButton() {
@@ -105,6 +106,15 @@ class Project {
             'click',
             this.updateProjectListHandler.bind(null, this.id)
         );
+    }
+
+    connectDrag() {
+        document
+            .getElementById(this.id)
+            .addEventListener('dragstart', (event) => {
+                event.dataTransfer.setData('text/plain', this.id);
+                event.dataTransfer.effectAllowed = 'move';
+            });
     }
 
     moreInfoBtnHandler() {
@@ -137,6 +147,7 @@ class ProjectList {
         this.listType = type;
         this.listSection = document.getElementById(sectionId);
         this.readProjects(this.listSection);
+        this.connectDroppable();
     }
 
     setSwitchHandler(switchHandlerFunction) {
@@ -151,6 +162,42 @@ class ProjectList {
                 new Project(el.id, this.switchProject.bind(this), this.listType)
             );
         }
+    }
+
+    connectDroppable() {
+        const list = this.listSection.querySelector('ul');
+
+        list.addEventListener('dragenter', (event) => {
+            if (event.dataTransfer.types[0] === 'text/plain') {
+                list.parentElement.classList.add('droppable');
+                event.preventDefault();
+            }
+        });
+        list.addEventListener('dragover', (event) => {
+            if (event.dataTransfer.types[0] === 'text/plain') {
+                event.preventDefault();
+            }
+        });
+
+        list.addEventListener('dragleave', (event) => {
+            if (
+                event.relatedTarget.closest(`#${this.listSection.id} ul`) !==
+                list
+            ) {
+                list.parentElement.classList.remove('droppable');
+            }
+        });
+
+        list.addEventListener('drop', (event) => {
+            const projId = event.dataTransfer.getData('text/plain');
+            if (!this.projects.find((p) => p.id === projId)) {
+                document
+                    .getElementById(projId)
+                    .querySelector('button:last-of-type')
+                    .click();
+                event.preventDefault(); // not needed
+            }
+        });
     }
 
     addProject(project) {
@@ -178,7 +225,7 @@ class App {
         activeList.setSwitchHandler(finishedList.addProject.bind(finishedList));
         finishedList.setSwitchHandler(activeList.addProject.bind(activeList));
 
-        setTimeout(this.startAnalytics, 5000)
+        // setTimeout(this.startAnalytics, 5000)
     }
 
     static startAnalytics() {
