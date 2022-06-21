@@ -16,22 +16,34 @@ const getPosition = () => {
             (success) => {
                 resolve(success);
             },
-            (error) => {}
+            (error) => {
+                reject(error);
+            }
         );
     });
     return promise;
 };
 
-function trackUserHandler() {
-    getPosition()
-        .then((posData) => {
-          positionData = posData;
-            return setTimer(2000);
-        })
-        .then((data) => {
-            console.log(data, positionData);
-        });
+async function trackUserHandler() {
+    try {
+        const posData = await getPosition();
+        const timerData = await setTimer(2000);
+        console.log(timerData, posData);
+    } catch (error) {
+        console.log(error);
+    }
 
+    // .then((posData) => {
+    //     positionData = posData;
+    //     return setTimer(2000);
+    // })
+    // .catch((err) => {
+    //     console.log(err);
+    //     return 'on we go';
+    // })
+    // .then((data) => {
+    //     console.log(data, positionData);
+    // });
 
     // navigator.geolocation.getCurrentPosition(
     //     (posData) => {
